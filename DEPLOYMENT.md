@@ -1,123 +1,79 @@
-# FrieNDA: simplest durable data store and Vercel deployment
+# Vercel and Supabase setup
 
-## Recommendation
+The repository now contains the Vercel API functions, Supabase REST adapter,
+database migration, and static-site configuration. This document explains the
+account setup that still has to be done; no Vercel or Supabase resources have
+been created and no signer emails have been sent.
 
-Use **Supabase Postgres through Vercel Marketplace** for the durable store, and
-Vercel Node.js Functions for the API. Keep the existing HTML/CSS/JavaScript
-front end as static files. This is a small relational data set, but it needs
-uniqueness and atomic single-use invite handling; Postgres provides those
-without inventing a file or key-value protocol.
+## 1. Create the database
 
-Vercel Functions have a read-only application filesystem (apart from temporary
-`/tmp` storage), so `.data/signatures.json` cannot be the live database. The
-Vercel Marketplace can provision a Supabase resource and synchronize its
-connection variables to the Vercel project. See the [Vercel storage
-integrations](https://vercel.com/docs/marketplace-storage) and [Supabase's
-Vercel Marketplace guide](https://supabase.com/docs/guides/integrations/vercel-marketplace).
+Create a Supabase project, then open its SQL Editor and run
+[`supabase/migrations/20261012000000_frienda_signing.sql`](supabase/migrations/20261012000000_frienda_signing.sql).
+It creates and seeds the six signer rows, enables row-level security, removes
+anonymous table access, and adds two server-only database functions:
 
-## Small schema
+- `issue_signing_invite` atomically reserves the per-signer one-minute cooldown
+  and stores the invite hash and expiry.
+- `confirm_email_signing` atomically consumes the invite, records consent and
+  the scribble, and invalidates any other invites for that signer.
 
-Keep the six known people in a `signers` table, seeded by one SQL migration:
+The database stores no email addresses or raw invite tokens. The Supabase
+secret key is used only by the server functions. Never add it to browser code or
+commit it to Git.
 
-```sql
-create table public.signers (
-  id text primary key check (id in ('dion','emily','ivan','amanda','juan','kathy')),
-  name text not null,
-  group_name text not null,
-  signed_at timestamptz,
-  method text check (method in ('handwritten','email-link')),
-  signature_points jsonb,
-  last_invited_at timestamptz,
-  check ((signed_at is null and method is null)
-      or (signed_at is not null and method is not null)),
-  check (method <> 'handwritten' or signature_points is not null)
-);
+## 2. Import the repository into Vercel
 
-create table public.signing_invites (
-  token_hash text primary key check (length(token_hash) = 64),
-  signer_id text not null references public.signers(id),
-  created_at timestamptz not null default now(),
-  expires_at timestamptz not null,
-  used_at timestamptz
-);
+In Vercel, create a project from `dalmaer/frienda`, using the repository root
+and the “Other” framework preset. There is no build step: `public/` is served as
+the site and `api/` contains Node.js functions. `vercel.json` adds baseline
+security headers. The site is intentionally public; `public/robots.txt` asks
+crawlers not to index it but does not protect the data.
+
+## 3. Configure environment variables
+
+Add these to Vercel **Production** only after the production database and email
+sender are ready. Keep **Preview** unconfigured or use a separate test database,
+test email addresses, and non-production credentials.
+
+```text
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SECRET_KEY=<server-only Supabase secret key>
+ADMIN_TOKEN=<at least 32 random characters>
+SIGNER_EMAILS_JSON={"dion":"...","emily":"...","ivan":"...","amanda":"...","juan":"...","kathy":"..."}
+RESEND_API_KEY=<Resend API key>
+FROM_EMAIL=FrieNDA <pledge@your-verified-domain>
+PUBLIC_URL=https://<your-domain>
 ```
 
-Do not put email addresses or raw invite tokens in these tables. Keep addresses
-in Vercel's server-side `SIGNER_EMAILS_JSON` variable; store only a SHA-256 hash
-of each random invite token. Retain the drawing only if the group wants it kept;
-otherwise store the consent, method, and timestamp and discard the points after
-submission.
+Use addresses you have permission to use, and verify the sender domain with
+Resend before sending. The repo contains no real addresses. The app shows the
+organizer panel only when all six addresses and all mail settings are present.
+The administrator token is entered in that panel and sent only in the request
+authorization header; it is not saved in the browser.
 
-## API and data flow
+## 4. Test a preview before sharing
 
-Move the current custom `http.createServer()` routes into Vercel functions under
-`/api/` (for example, `api/state.js`, `api/manual-sign.js`,
-`api/admin/invite.js`, and `api/email-sign.js`). Keep reusable database and
-validation helpers in underscored files such as `api/_lib/store.js`. Serve the
-current `public/` assets from the deployment root. Vercel Functions support
-Node.js request handlers from the root `api/` directory; the current long-lived
-HTTP server entry point is not itself a function handler.
+After the migration and environment are ready, deploy a Vercel preview and test
+the full flow with test addresses:
 
-Add `@supabase/supabase-js`; create its client once in the shared server helper
-from `SUPABASE_URL` and `SUPABASE_SECRET_KEY`. Use the Supabase Data API over
-HTTPS, so the functions do not need to maintain database sockets. Enable RLS on
-both tables, add no anonymous table policies, and never ship the Supabase secret
-key to the browser. Only the Vercel functions get that key. Supabase documents that
-its secret/service-role keys bypass RLS and must never be exposed to clients in
-the [RLS guide](https://supabase.com/docs/guides/database/postgres/row-level-security).
+1. Confirm `/api/state` shows six unsigned signers and no email addresses.
+2. Send one invitation; confirm it reaches only the configured address.
+3. Open the link and confirm its token is in the URL fragment, not the query
+   string, and is cleared from the address bar when the page opens.
+4. Confirm without a scribble or consent; the API must reject it.
+5. Sign, refresh the page, and confirm the signature remains in Supabase.
+6. Replay the link and attempt a second invite within one minute; both must fail.
+7. Confirm the site works from a second browser/device and the public status
+   shows only names, groups, methods, and timestamps.
 
-- `GET /api/state`: read the six signer rows and return only names, group,
-  signed state, method, and timestamp. Never return emails or invite hashes.
-- `POST /api/manual-sign`: validate consent and normalized strokes, then update
-  one unsigned signer row. The signer primary key makes duplicate signing a
-  conflict instead of a second signature.
-- `POST /api/admin/invite`: validate the organizer token, check
-  `last_invited_at` in the database for a durable rate limit, generate a random
-  one-time token, store its hash and expiry, and send the raw link via Resend.
-- `POST /api/email-sign`: call one Postgres function that atomically claims an
-  unexpired, unused token and records the signer's assent. A second use, expired
-  link, or already-signed person returns a conflict/gone response.
+Before changing Production settings, confirm the group is comfortable with the
+public page displaying who has signed and when. The repository is public, and
+`robots.txt` is only a crawler request. For private signatures, add real access
+control before deploying rather than relying on an unlisted URL.
 
-The current email link puts its token in the query string. Before deployment,
-move it to the URL fragment and have the browser submit it once to the API; a
-fragment is not sent in the initial HTTP request. Clear it from browser history
-after reading. Keep request logging from recording invite tokens.
+## Local development
 
-## Vercel setup
-
-1. In Vercel, import `dalmaer/frienda` as a project with the repository root as
-   its root directory. Use the “Other” framework preset; there is no front-end
-   build step. Put the current `robots.txt` in `public/robots.txt` so it is
-   served at the deployed site's root.
-2. Add Supabase from Vercel Marketplace and create the schema by running a
-   checked-in migration in the Supabase SQL editor. Seed the six signer rows.
-3. Keep `SUPABASE_SECRET_KEY` and all application secrets server-only. Add
-   `ADMIN_TOKEN`, `SIGNER_EMAILS_JSON`, `RESEND_API_KEY`, `FROM_EMAIL`, and
-   `PUBLIC_URL` in Vercel project settings. Configure Production and Preview
-   separately; previews should use a separate test database and fake/test
-   addresses, never the production signer list.
-4. Deploy a preview and test the state endpoint, handwritten submission,
-   duplicate submission, invite email, successful email confirmation, expiry,
-   replay, and database persistence across separate function invocations.
-5. Promote to production only after checking the public deployment's access and
-   data behavior. The repository and site are public by choice; `robots.txt`
-   asks crawlers not to index, but it is not a privacy control.
-
-## One important signing limitation
-
-The public scribble form currently lets a visitor select any of the six names.
-A drawn mark does not prove who drew it. For a public site, the cleanest way to
-make a person's assent attributable to their own inbox is to send each person a
-unique email link and let that link open the same consent-and-scribble form. The
-link then proves control of that email account at signing time; it still is not
-a legal identity check or a legally binding NDA. Until that flow is built,
-disable public name-select scribble signing or treat it as an informal keepsake
-only.
-
-## Existing data
-
-The ignored local `.data/signatures.json` is not in Git. No production
-signatures exist yet, so the initial migration starts with six unsigned rows.
-If local test signatures are ever worth keeping, write a one-time import script
-that reads the file locally and inserts only the intended records; never commit
-the file or put it in a deployment bundle.
+`npm start` runs the Node server with an ignored local JSON store. It is useful
+for the pledge and status UI, but does not exercise the production database
+adapter. Do not copy a local test signature file into production without an
+explicit decision to preserve it.

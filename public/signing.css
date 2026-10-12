@@ -1,0 +1,4 @@
+.signing-note strong{font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--accent)}
+.signing-note span{max-width:420px;color:var(--muted);font-size:13px;line-height:1.65}
+dialog .canvas-wrap{margin-top:14px}
+dialog .canvas-actions{margin-top:-5px}

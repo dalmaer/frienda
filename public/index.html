@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#f4eee2">
     <title>FrieNDA — Friend Non-Disclosure-ish Agreement</title>
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/signing.css">
     <script src="/app.js" defer></script>
   </head>
   <body>
@@ -52,18 +53,10 @@
       <section class="signing-area" id="signing-area" aria-labelledby="signing-heading">
         <div class="signing-intro">
           <p class="eyebrow">MAKE IT OFFICIAL-ISH</p>
-          <h2 id="signing-heading">Add your mark.</h2>
-          <p>Choose your name, read the pledge, then sign with a scribble. Or ask Dion to send a one-time link to your own email.</p>
+          <h2 id="signing-heading">Your own little oath.</h2>
+          <p>Each person signs from a private, one-time link sent to their own email. Ask Dion for yours; the page will open with your name, the pledge, and a spot for your very official scribble.</p>
         </div>
-        <form id="manual-form" class="signature-form">
-          <label for="signer-select">I am</label>
-          <select id="signer-select" required><option value="">Choose your name…</option></select>
-          <div class="canvas-wrap"><canvas id="signature-pad" aria-label="Draw your signature here"></canvas><span class="canvas-hint">Your very official scribble goes here</span></div>
-          <div class="canvas-actions"><span>Finger, mouse, trackpad: all accepted by the snack tribunal.</span><button type="button" class="text-button" id="clear-signature">Clear</button></div>
-          <label class="consent"><input id="manual-consent" type="checkbox" required><span>I read the pledge and agree to keep group stories in the group.</span></label>
-          <button type="submit" class="primary-button">Sign the FrieNDA <span>↗</span></button>
-          <p class="form-message" id="manual-message" role="status"></p>
-        </form>
+        <div class="signature-form signing-note"><strong>Personal links only</strong><span>A scribble is a keepsake, not identity verification. The email link helps make sure each mark comes from the invited person’s inbox.</span></div>
       </section>
 
       <section class="email-admin" id="email-admin" hidden>
@@ -86,9 +79,11 @@
         <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
         <p class="eyebrow">PERSONAL EMAIL LINK</p>
         <h2 id="email-title">Your pledge is ready.</h2>
-        <p>This one-time link identifies the invited signer. Read the pledge above, then confirm below to record your email-verified assent.</p>
+        <p>This one-time link was sent to your personal email. Read the pledge above, add a scribble, and confirm your assent.</p>
+        <div class="canvas-wrap"><canvas id="signature-pad" aria-label="Draw your signature here"></canvas><span class="canvas-hint">Your very official scribble goes here</span></div>
+        <div class="canvas-actions"><span>Finger, mouse, trackpad: all accepted by the snack tribunal.</span><button type="button" class="text-button" id="clear-signature">Clear</button></div>
         <label class="consent"><input id="email-consent" type="checkbox"><span>I read the pledge and agree to keep group stories in the group.</span></label>
-        <button id="confirm-email-sign" class="primary-button" type="button">Confirm my pledge <span>↗</span></button>
+        <button id="confirm-email-sign" class="primary-button" type="button">Sign the FrieNDA <span>↗</span></button>
         <p class="form-message" id="email-message" role="status"></p>
       </dialog>
     </main>

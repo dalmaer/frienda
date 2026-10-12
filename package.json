@@ -2,7 +2,7 @@
   "name": "frienda",
   "version": "0.1.0",
   "private": true,
-  "description": "A tiny, funny, private-group pledge and signing app.",
+  "description": "A tiny, funny, email-link-signed private-group pledge app.",
   "type": "module",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.mjs",
@@ -10,6 +10,6 @@
     "test": "node --test"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.9"
   }
 }

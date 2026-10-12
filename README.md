@@ -2,49 +2,43 @@
 
 A private, deliberately non-legal group pledge for Dion and Emily Almaer,
 Ivan and Amanda Dufresne Lee, and Juan and Kathy Batlle. “Blood oath” is a
-metaphor here: no blood, needles, actual legal NDA, or mysterious basement
-ceremony required.
+metaphor: no blood, needles, actual legal NDA, or mysterious basement ceremony
+required.
 
 ## Run locally
 
-Requires Node.js 20 or newer; there are no package dependencies.
+Requires Node.js 22.9 or newer. The app has no package dependencies.
 
 ```sh
 npm start
 ```
 
-Open <http://localhost:4317>. Signatures and invite tokens are written to
-`.data/signatures.json`, which is intentionally ignored by Git. The server
-binds to `127.0.0.1` by default, so it is only reachable on this Mac.
+Open <http://localhost:4317>. Local signatures and invite hashes live in
+`.data/signatures.json`, which is ignored by Git. The local server binds to
+`127.0.0.1`. It uses this file store for development; Vercel uses Supabase.
 
-## Signing options
+## Signing
 
-- **Scribble:** a participant selects their name, reads the pledge, checks the
-  assent box, draws a mark, and submits it. The app labels this a handwritten
-  signature; it does not independently verify who held the device.
-- **Personal email link:** configure `ADMIN_TOKEN`, `SIGNER_EMAILS_JSON`,
-  `RESEND_API_KEY`, `FROM_EMAIL`, and `PUBLIC_URL` in a local `.env` (copy
-  `.env.example`). Restart the server, open the invite panel, enter the admin
-  token, and send a link to the chosen participant. Each link is random,
-  single-use, stored only as a hash, and expires after seven days. The signer
-  opens the link and explicitly confirms the pledge. The server records that
-  the link was used; it does not claim this is legally binding identity proof.
+Public visitors can see the six names and signature status, but cannot select a
+person or sign as them. The organizer sends a personal link to the configured
+email for each signer. The link is random, single-use, expires after seven days,
+and is stored only as a SHA-256 hash. It opens that person’s scribble and assent
+form. This demonstrates access to the invited inbox at signing time; it is not
+legal identity verification or a legally binding electronic signature.
 
-The email flow is off until configured. The app never guesses or looks up
-email addresses, and no email is sent by this project as created.
+No real email addresses or mail credentials are included. Organizer controls
+stay hidden until all six addresses and the mail settings are configured. A
+failed email delivery still holds that signer’s one-minute invite cooldown.
 
-## Privacy and hosting
+## Deploying
 
-This is a friendly-group keepsake, not legal advice or a legally enforceable
-NDA. It stores a signature drawing, name, method, and timestamp locally. Do
-not expose this local server to the internet as-is. A real shared deployment
-needs HTTPS, private access controls, a durable database, backups, and a
-review of the chosen email sender and hosting provider. Keep `.env` and
-`.data/` out of Git.
-
-For the proposed durable database and Vercel deployment, see
-[`DEPLOYMENT.md`](DEPLOYMENT.md). It is a plan only; this repository has not
-been connected to Vercel or Supabase.
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the Vercel/Supabase setup. The checked-in
+migration is [`supabase/migrations/20261012000000_frienda_signing.sql`](supabase/migrations/20261012000000_frienda_signing.sql).
+The website and repository are public by choice. `robots.txt` and an
+`X-Robots-Tag` header ask crawlers not to index the site; neither is access
+control. Names and who has signed (including timestamps) are publicly visible.
+The signature drawings are stored in Supabase but are not returned to the public
+status endpoint or shown on the page.
 
 ## Tests
 
