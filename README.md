@@ -1,7 +1,7 @@
 # FrieNDA
 
 A private, deliberately non-legal group pledge for Dion and Emily Almaer,
-Ivan and Amanda Dufresne Lee, and Juan and Kathy Batlle. “Blood oath” is a
+Ivan Lee and Amanda Dufresne Lee, and Juan and Kathy Batlle. “Blood oath” is a
 metaphor: no blood, needles, actual legal NDA, or mysterious basement ceremony
 required.
 

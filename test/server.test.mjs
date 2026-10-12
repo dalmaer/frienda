@@ -21,12 +21,12 @@ test('email invitations require all six addresses and provider credentials', () 
 
 test('the group contains the six requested signers and complete surnames', async () => {
   assert.deepEqual(SIGNERS.map(({ name }) => name), [
-    'Dion Almaer', 'Emily Almaer', 'Ivan Dufresne Lee',
+    'Dion Almaer', 'Emily Almaer', 'Ivan Lee',
     'Amanda Dufresne Lee', 'Juan Batlle', 'Kathy Batlle',
   ]);
   const manuscript = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   const migration = await readFile(new URL('../supabase/migrations/20261012000000_frienda_signing.sql', import.meta.url), 'utf8');
-  for (const name of ['Juan and Kathy Batlle', 'Ivan and Amanda Dufresne Lee', 'Dion and Emily Almaer']) {
+  for (const name of ['Juan and Kathy Batlle', 'Ivan Lee and Amanda Dufresne Lee', 'Dion and Emily Almaer']) {
     assert.ok(manuscript.includes(name));
   }
   assert.match(manuscript, /NO ACTUAL BLOOD WAS DRAWN/);
