@@ -42,6 +42,10 @@ needs HTTPS, private access controls, a durable database, backups, and a
 review of the chosen email sender and hosting provider. Keep `.env` and
 `.data/` out of Git.
 
+For the proposed durable database and Vercel deployment, see
+[`DEPLOYMENT.md`](DEPLOYMENT.md). It is a plan only; this repository has not
+been connected to Vercel or Supabase.
+
 ## Tests
 
 ```sh
