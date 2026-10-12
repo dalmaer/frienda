@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4eee2">
+    <title>FrieNDA — Friend Non-Disclosure-ish Agreement</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topline">
+        <a class="wordmark" href="/" aria-label="FrieNDA home">frie<span>nda</span></a>
+        <div class="top-note"><span class="seal-dot"></span> PRIVATE CIRCLE · SIX SIGNERS</div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">THE FRIEND NON-DISCLOSURE-ISH AGREEMENT</p>
+          <h1>What’s said in<br><em>the group</em> stays here.</h1>
+          <p class="lede">A tiny oath for a very trusted circle. Dramatic enough to sign; not remotely a lawyer.</p>
+        </div>
+        <div class="stamp" aria-label="Friendship sealed with snacks">
+          <span>SEALED WITH</span>
+          <strong>FRIENDSHIP</strong>
+          <span>AND SNACKS</span>
+          <b>✳</b>
+        </div>
+      </section>
+
+      <section class="pledge-card" aria-labelledby="pledge-heading">
+        <div class="card-top"><span class="card-label">THE PLEDGE</span><span class="card-no">F·N·D·A / 001</span></div>
+        <h2 id="pledge-heading">A solemn-ish promise</h2>
+        <div class="manuscript">
+          <p>We, <strong>Juan and Kathy Batlle</strong>, <strong>Ivan and Amanda Dufresne Lee</strong>, and <strong>Dion and Emily Almaer</strong>, do hereby declare that anything said, shown, confessed, screenshotted, or dramatically whispered to anyone in this group becomes an <em>instant FrieNDA moment</em>.</p>
+          <p>It stays within this circle. No forwarding, quoting at brunch, “hypothetically” retelling it to another friend, or laundering it through a different group chat. A story does not become public domain just because it was funny.</p>
+          <p>We will protect each other’s secrets with the seriousness of a tiny dragon guarding one (1) emotionally important sandwich. If we slip, we will own it, tell the group, apologize, and help contain the spill.</p>
+          <p class="oath-line">If we knowingly break this pledge, we owe the circle snacks, a sincere apology, and one week wearing the ceremonial Hat of Mild Disappointment. <strong>This is a blood oath in the theatrical sense only.</strong> No blood, needles, curses, lawyers, or actual hats are required (the snacks are negotiable but strongly encouraged).</p>
+        </div>
+        <div class="pledge-foot"><span>By signing, we promise good judgment and better group-chat manners.</span><span>✦ &nbsp; NO ACTUAL BLOOD WAS DRAWN &nbsp; ✦</span></div>
+      </section>
+
+      <section class="signers-section" aria-labelledby="signers-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">THE CIRCLE</p><h2 id="signers-heading">Six friends. One shared secret-keeping pact.</h2></div>
+          <div class="progress" id="progress" aria-live="polite">Loading signatures…</div>
+        </div>
+        <div class="signer-grid" id="signer-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="signing-area" id="signing-area" aria-labelledby="signing-heading">
+        <div class="signing-intro">
+          <p class="eyebrow">MAKE IT OFFICIAL-ISH</p>
+          <h2 id="signing-heading">Add your mark.</h2>
+          <p>Choose your name, read the pledge, then sign with a scribble. Or ask Dion to send a one-time link to your own email.</p>
+        </div>
+        <form id="manual-form" class="signature-form">
+          <label for="signer-select">I am</label>
+          <select id="signer-select" required><option value="">Choose your name…</option></select>
+          <div class="canvas-wrap"><canvas id="signature-pad" aria-label="Draw your signature here"></canvas><span class="canvas-hint">Your very official scribble goes here</span></div>
+          <div class="canvas-actions"><span>Finger, mouse, trackpad: all accepted by the snack tribunal.</span><button type="button" class="text-button" id="clear-signature">Clear</button></div>
+          <label class="consent"><input id="manual-consent" type="checkbox" required><span>I read the pledge and agree to keep group stories in the group.</span></label>
+          <button type="submit" class="primary-button">Sign the FrieNDA <span>↗</span></button>
+          <p class="form-message" id="manual-message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="email-admin" id="email-admin" hidden>
+        <details>
+          <summary>Organizer tools · send personal signing links</summary>
+          <div class="admin-tools">
+            <label for="admin-token">Organizer token</label>
+            <input id="admin-token" type="password" autocomplete="off" placeholder="Enter the ADMIN_TOKEN from .env">
+            <div id="invite-buttons" class="invite-buttons"></div>
+            <p class="form-message" id="invite-message" role="status"></p>
+            <p class="fine-print">Each link goes only to the configured address for that person. No email is sent until you click an invite button.</p>
+          </div>
+        </details>
+      </section>
+
+      <footer class="footer"><span>FRIENDA · FRIEND NON-DISCLOSURE-ISH AGREEMENT</span><span>Made of trust, not legalese. Keep it kind. Keep it here.</span></footer>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+      <dialog id="email-confirm">
+        <form method="dialog" class="dialog-close"><button aria-label="Close">×</button></form>
+        <p class="eyebrow">PERSONAL EMAIL LINK</p>
+        <h2 id="email-title">Your pledge is ready.</h2>
+        <p>This one-time link identifies the invited signer. Read the pledge above, then confirm below to record your email-verified assent.</p>
+        <label class="consent"><input id="email-consent" type="checkbox"><span>I read the pledge and agree to keep group stories in the group.</span></label>
+        <button id="confirm-email-sign" class="primary-button" type="button">Confirm my pledge <span>↗</span></button>
+        <p class="form-message" id="email-message" role="status"></p>
+      </dialog>
+    </main>
+  </body>
+</html>
