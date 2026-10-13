@@ -57,10 +57,11 @@ export function createServer({ dataDir = path.join(ROOT, '.data'), env = process
       }
       if (request.method === 'GET') {
         const assets = { '/': 'index.html', '/index.html': 'index.html', '/app.js': 'app.js', '/styles.css': 'styles.css', '/signing.css': 'signing.css', '/robots.txt': 'robots.txt' };
+        for (const { id } of SIGNERS) assets[`/photos/${id}.jpg`] = `photos/${id}.jpg`;
         const asset = assets[url.pathname];
         if (!asset) return json(response, 404, { error: 'Not found.' });
         const types = { 'index.html': 'text/html; charset=utf-8', 'app.js': 'text/javascript; charset=utf-8', 'styles.css': 'text/css; charset=utf-8', 'signing.css': 'text/css; charset=utf-8', 'robots.txt': 'text/plain; charset=utf-8' };
-        response.writeHead(200, { 'Content-Type': types[asset], ...(asset === 'index.html' ? { 'Cache-Control': 'no-store' } : {}) });
+        response.writeHead(200, { 'Content-Type': types[asset] || 'image/jpeg', ...(asset === 'index.html' ? { 'Cache-Control': 'no-store' } : {}) });
         response.end(await readFile(path.join(PUBLIC, asset)));
         return;
       }

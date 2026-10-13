@@ -25,7 +25,8 @@ function render() {
   const signed = state.signers.filter((signer) => signer.signed).length;
   $('#progress').textContent = `${signed} of ${state.signers.length} signed`;
   signerGrid.innerHTML = state.signers.map((signer) => `
-    <article class="signer-card">
+    <article class="signer-card" tabindex="0">
+      <img class="signer-photo" src="/photos/${encodeURIComponent(signer.id)}.jpg" alt="" loading="lazy" decoding="async">
       <div class="signer-top"><span class="signer-name">${escapeHtml(signer.name)}</span><span class="status ${signer.signed ? 'signed' : ''}">${signer.signed ? 'SIGNED' : 'PENDING'}</span></div>
       <div class="signer-meta"><span>${escapeHtml(signedLabel(signer))}</span><span class="group-note">${escapeHtml(signer.group)}</span></div>
     </article>`).join('');
